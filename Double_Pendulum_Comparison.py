@@ -5,7 +5,6 @@ from matplotlib import animation
 import math
 import sys
 
-
 def next_state(state, h):
 
     temp_state = State([0,0],[0,0],[0,0],[0,0])
@@ -77,7 +76,7 @@ class State():
         pos_y = None,
         theta = [(180/math.pi)*90, (180/math.pi)*-90],# 0 = South
         omega = [0, 0],
-        mass = [sys.argv[1], sys.argv[2]],
+        mass = [1, 1.5],
         length = [5, 7]
     ):
         try:
@@ -85,7 +84,7 @@ class State():
             self.pos_y = [-math.cos((180/math.pi)*90)*length[0], -math.cos((180/math.pi)*90)*length[0] - length[1]*math.cos((180/math.pi)*-90)] if pos_y == None else pos_y
             self.theta = theta
             self.omega = omega
-            self.mass = [int(mass[0]), int(mass[1])]
+            self.mass = mass
             self.length = length
         except:
             print("ERROR - state __init__")
@@ -127,28 +126,32 @@ class State():
 
 size = 1000
 skip = 100
+d = 2
 
 
-x_matrix = np.zeros(shape = (size, 2))
-y_matrix = np.zeros(shape = (size, 2))
+x_matrix = np.zeros(shape = (size, 2, d))
+y_matrix = np.zeros(shape = (size, 2, d))
 
-state = State()
+states = [State(mass=[random.random(), random.random()]) for i in range(10)]
 
 for i in range(skip*size):
-    if i%skip == 0:
-        x_matrix[i//skip, :], y_matrix[i//skip, :] = state.pos_x, state.pos_y
+    for j in range(len(states)):
+        if i%skip == 0:
+            for k in range(d):
+                print(states[j].pos_x)
+                print(x_matrix[i//skip, :, j])
+                x_matrix[i//skip, :, j] = states[j].pos_x
+                y_matrix[i//skip, :, j] = states[j].pos_y
 
-    state = next_state(state, 0.0001)
+        states[j] = next_state(states[j], 0.0001)
 
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-x = x_matrix
-y = y_matrix
+x = x_matrix[:, :, 0]
+y = y_matrix[:, :, 0]
 
-print(f'{y = }')
-print(f'{x = }')
 
 dot = ax.plot(0, 0, 'o', color = "#1b5e20")
 

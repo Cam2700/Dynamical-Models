@@ -139,10 +139,6 @@ state = State()
 fig = plt.figure()
 ax = fig.add_subplot()
 
-# for i in range(skip*size):
-#     if i%skip == 0:
-#         x_matrix[i//skip, :], y_matrix[] = state.pos_x, state.pos_y
-
 plt.xlim(-12, 12)
 plt.ylim(-12, 12)
 
@@ -153,7 +149,6 @@ dot2, = ax.plot(0, 0, 'o', color = "#311b92")
 
 line3, = ax.plot([0, 0], [0, 0], '-')
 line4, = ax.plot([0, 0], [0, 0], '-')
-
 
 
 ani = animation.FuncAnimation(fig, update, size, fargs=(state, dot1, dot2, line3, line4), interval = 1)
