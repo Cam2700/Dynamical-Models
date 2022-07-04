@@ -54,18 +54,36 @@ def diff_value(state):
     return temp_state
 
 
-def update(num, dot1, dot2, line3, line4, trail, x, y):
+def update(num, arguments, states, ax, dimension):
     val = max(0, num - 1000)
 
     ax.set_title(num)
 
-    dot1.set_data(x[num, 0], y[num, 0])
-    dot2.set_data(x[num, 1], y[num, 1])
+    temp_states = states
 
-    line3.set_data([0, x[num, 0]], [0, y[num, 0]])
-    line4.set_data([x[num, 0], x[num, 1]], [y[num, 0], y[num, 1]])
+    x = np.zeros(shape = (2, dimension))
+    y = np.zeros(shape = (2, dimension))
 
-    trail.set_data(x[val:num, 1], y[val:num, 1])
+    for i in range(dimension):
+        x[:, i] = states[i].pos_x
+        y[:, i] = states[i].pos_y
+
+        for j in range(100):
+            temp_states[i] = next_state(temp_states[i], 0.0001)
+
+
+        states[i].pos_x = temp_states[i].pos_x
+        states[i].pos_y = temp_states[i].pos_y
+        states[i].theta = temp_states[i].theta
+        states[i].omega = temp_states[i].omega
+
+
+    for (dot1, dot2, line3, line4, trail), i in zip(arguments, range(len(arguments))):
+        dot1.set_data(x[0, i], y[0, i])
+        dot2.set_data(x[1, i], y[1, i])
+
+        line3.set_data([0, x[0, i]], [0, y[0, i]])
+        line4.set_data([x[0, i], x[1, i]], [y[0, i], y[1, i]])
 
 
 class State():
@@ -99,6 +117,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] + other.pos_x[i]
@@ -106,7 +126,7 @@ class State():
             t_t[i] = self.theta[i] + other.theta[i]
             t_o[i] = self.omega[i] + other.omega[i]
 
-        return State(t_x, t_y, t_t, t_o)
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
     def __mul__(self, other):
 
@@ -114,6 +134,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] * other
@@ -121,50 +143,37 @@ class State():
             t_t[i] = self.theta[i] * other
             t_o[i] = self.omega[i] * other
 
-        return State(t_x, t_y, t_t, t_o)
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
 
 size = 1000
-skip = 100
-d = 2
+dimension = 10
 
-
-x_matrix = np.zeros(shape = (size, 2, d))
-y_matrix = np.zeros(shape = (size, 2, d))
-
-states = [State(mass=[random.random(), random.random()]) for i in range(10)]
-
-for i in range(skip*size):
-    for j in range(len(states)):
-        if i%skip == 0:
-            for k in range(d):
-                print(states[j].pos_x)
-                print(x_matrix[i//skip, :, j])
-                x_matrix[i//skip, :, j] = states[j].pos_x
-                y_matrix[i//skip, :, j] = states[j].pos_y
-
-        states[j] = next_state(states[j], 0.0001)
-
+states = [State(length=[random.random()*10, random.random()*10]) for i in range(10)]
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-x = x_matrix[:, :, 0]
-y = y_matrix[:, :, 0]
+plt.xlim(-12, 12)
+plt.ylim(-12, 12)
 
+arguments = []
 
 dot = ax.plot(0, 0, 'o', color = "#1b5e20")
 
-dot1, = ax.plot(x[:, 0], y[:, 0], 'o', color = "#b71c1c")
-dot2, = ax.plot(x[:, 1], y[:, 1], 'o', color = "#311b92")
+for i in range(dimension):
+    dot1, = ax.plot(0, 0, 'o', color = "#b71c1c")
+    dot2, = ax.plot(0, 0, 'o', color = "#311b92")
 
-line3, = ax.plot([0, x[0, 1]], [0, y[0, 1]], '-')
-line4, = ax.plot([x[0, 0], x[0, 1]], [y[0, 0], y[0, 1]], '-')
+    line3, = ax.plot([0, 0], [0, 0], '-')
+    line4, = ax.plot([0, 0], [0, 0], '-')
 
-trail, = ax.plot([x[0, 1], y[0, 1]], '-')
+    trail, = ax.plot([0, 0], '-')
+
+    arguments.append((dot1, dot2, line3, line4, trail))
 
 
-ani = animation.FuncAnimation(fig, update, size, fargs=(dot1, dot2, line3, line4, trail, x, y), interval = 1)
+ani = animation.FuncAnimation(fig, update, size, fargs=(arguments, states, ax, dimension), interval = 1)
 
 plt.show()
 

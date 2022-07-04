@@ -100,6 +100,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] + other.pos_x[i]
@@ -107,7 +109,7 @@ class State():
             t_t[i] = self.theta[i] + other.theta[i]
             t_o[i] = self.omega[i] + other.omega[i]
 
-        return State(t_x, t_y, t_t, t_o)
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
     def __mul__(self, other):
 
@@ -115,6 +117,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] * other
@@ -122,7 +126,7 @@ class State():
             t_t[i] = self.theta[i] * other
             t_o[i] = self.omega[i] * other
 
-        return State(t_x, t_y, t_t, t_o)
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
 
 size = 1000

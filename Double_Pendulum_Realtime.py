@@ -127,12 +127,6 @@ class State():
 
 
 size = 10000
-skip = 100
-
-
-
-x_matrix = np.zeros(shape = (size, 2))
-y_matrix = np.zeros(shape = (size, 2))
 
 state = State()
 
