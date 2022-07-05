@@ -3,10 +3,23 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 import math
-import sys
+
+# Graphical comparison of the differences in motion caused by subtle differences in starting parameters
+#
+# --------------------------------------------------------------------------
+#
+# next_state: returns a updated state using Runge Kutta
+# diff_state: returns the difference in state objects, using differential equations
+# update: produces a plot of several pendulums at a time step
+#
+# --------------------------------------------------------------------------
+#
+# Change Variation:
+# line 157
+# [State(pos_x,pos_y,[t1,t2],[o1,o2],[m1,m2],[l1 + random.random(),l2 + random.random()]) for i in range(dimension)]
+# Move the addition of the random values (between 0 -> 1), to other parameters
 
 def next_state(state, h):
-
     temp_state = State([0,0],[0,0],[0,0],[0,0])
 
     k1 = diff_value(state)
@@ -28,7 +41,6 @@ def next_state(state, h):
 
 
 def diff_value(state):
-
     temp_state = State([0,0],[0,0],[0,0],[0,0])
     
     t1, t2 = state.theta[0], state.theta[1]
@@ -54,36 +66,19 @@ def diff_value(state):
     return temp_state
 
 
-def update(num, arguments, states, ax, dimension):
+def update(num, arguments, ax, x, y):
     val = max(0, num - 1000)
 
     ax.set_title(num)
 
-    temp_states = states
-
-    x = np.zeros(shape = (2, dimension))
-    y = np.zeros(shape = (2, dimension))
-
-    for i in range(dimension):
-        x[:, i] = states[i].pos_x
-        y[:, i] = states[i].pos_y
-
-        for j in range(100):
-            temp_states[i] = next_state(temp_states[i], 0.0001)
-
-
-        states[i].pos_x = temp_states[i].pos_x
-        states[i].pos_y = temp_states[i].pos_y
-        states[i].theta = temp_states[i].theta
-        states[i].omega = temp_states[i].omega
-
-
     for (dot1, dot2, line3, line4, trail), i in zip(arguments, range(len(arguments))):
-        dot1.set_data(x[0, i], y[0, i])
-        dot2.set_data(x[1, i], y[1, i])
+        dot1.set_data(x[num, 0, i], y[num, 0, i])
+        dot2.set_data(x[num, 1, i], y[num, 1, i])
 
-        line3.set_data([0, x[0, i]], [0, y[0, i]])
-        line4.set_data([x[0, i], x[1, i]], [y[0, i], y[1, i]])
+        line3.set_data([0, x[num, 0, i]], [0, y[num, 0, i]])
+        line4.set_data([x[num, 0, i], x[num, 1, i]], [y[num, 0, i], y[num, 1, i]])
+
+        trail.set_data(x[val:num, 1, i], y[val:num, 1, i])
 
 
 class State():
@@ -92,20 +87,17 @@ class State():
         self,
         pos_x = None,
         pos_y = None,
-        theta = [(180/math.pi)*90, (180/math.pi)*-90],# 0 = South
-        omega = [0, 0],
-        mass = [1, 1.5],
-        length = [5, 7]
+        theta = None,# 0 = South
+        omega = None,
+        mass = None,
+        length = None
     ):
-        try:
-            self.pos_x = [math.sin((180/math.pi)*90)*length[0], math.sin((180/math.pi)*90)*length[0] + length[1]*math.sin((180/math.pi)*-90)] if pos_x == None else pos_x
-            self.pos_y = [-math.cos((180/math.pi)*90)*length[0], -math.cos((180/math.pi)*90)*length[0] - length[1]*math.cos((180/math.pi)*-90)] if pos_y == None else pos_y
-            self.theta = theta
-            self.omega = omega
-            self.mass = mass
-            self.length = length
-        except:
-            print("ERROR - state __init__")
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.theta = theta
+        self.omega = omega
+        self.mass = mass
+        self.length = length
 
     def __str__(self):
 
@@ -147,35 +139,55 @@ class State():
 
 
 size = 1000
-dimension = 10
+skip = 100
+dimension = 50
 
-states = [State(length=[random.random()*10, random.random()*10]) for i in range(10)]
+x_matrix = np.zeros(shape = (size*skip, 2, dimension))
+y_matrix = np.zeros(shape = (size*skip, 2, dimension))
+
+t1, t2 = 0.5*math.pi, 0.5*math.pi
+o1, o2 = 0, 0
+m1, m2 = 1, 1.5
+l1, l2 = 5, 7
+
+x1 = math.sin(t1)*l1
+y1 = -math.cos(t1)*l2
+
+pos_x = [x1, x1 + l2*math.sin(t2)]
+pos_y = [y1, y1 - l2*math.cos(t2)]
+
+states = [State(pos_x,pos_y,[t1,t2],[o1,o2],[m1,m2],[l1 + random.random(),l2 + random.random()]) for i in range(dimension)]
+
+for i in range(size*skip):
+    for j in range(dimension):
+        states[j] = next_state(states[j], 0.0001)
+        if i%skip == 0:
+            x_matrix[i//skip, :, j] = states[j].pos_x
+            y_matrix[i//skip, :, j] = states[j].pos_y
+
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-plt.xlim(-12, 12)
-plt.ylim(-12, 12)
+x = x_matrix
+y = y_matrix
 
 arguments = []
 
 dot = ax.plot(0, 0, 'o', color = "#1b5e20")
 
 for i in range(dimension):
-    dot1, = ax.plot(0, 0, 'o', color = "#b71c1c")
-    dot2, = ax.plot(0, 0, 'o', color = "#311b92")
+    dot1, = ax.plot(x[:, 0, i], y[:, 0, i], 'o', color = "#b71c1c")
+    dot2, = ax.plot(x[:, 1, i], y[:, 1, i], 'o', color = "#311b92")
 
-    line3, = ax.plot([0, 0], [0, 0], '-')
-    line4, = ax.plot([0, 0], [0, 0], '-')
+    line3, = ax.plot([0, x[0, 1, i]], [0, y[0, 1, i]], '-')
+    line4, = ax.plot([x[0, 0, i], x[0, 1, i]], [y[0, 0, i], y[0, 1, i]], '-')
 
-    trail, = ax.plot([0, 0], '-')
+    trail, = ax.plot([x[0, 1, i], y[0, 1, i]], '-')
 
     arguments.append((dot1, dot2, line3, line4, trail))
 
 
-ani = animation.FuncAnimation(fig, update, size, fargs=(arguments, states, ax, dimension), interval = 1)
+ani = animation.FuncAnimation(fig, update, size, fargs=(arguments, ax, x, y), interval = 1)
 
 plt.show()
-
-
-# goodluck future self

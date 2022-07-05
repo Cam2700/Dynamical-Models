@@ -1,9 +1,33 @@
-import random
-import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 import math
 
+# Simple plot of a double pendulum updated in realtime
+#
+# --------------------------------------------------------------------------
+#
+# Each plot is calculated by Runge Kutta
+# diff_values is called to provide a known gradient
+#
+# --------------------------------------------------------------------------
+#
+# Staring values:
+# lines 149 -> 153
+# t1, t2 = 0.5*math.pi, 0.5*math.pi
+# o1, o2 = 0, 0
+# m1, m2 = 1, 1.5
+# l1, l2 = 5, 7
+#
+# --------------------------------------------------------------------------
+#
+# Theta: angle of pendulum in radians (0 = South, + = anti-clockwise)
+# Omega: angular velocity
+# mass: mass each weight
+# length: length of rods
+#
+# --------------------------------------------------------------------------
+#
+# https://web.mit.edu/jorloff/www/chaosTalk/double-pendulum/double-pendulum-en.html
 
 def next_state(state, h):
 
@@ -80,15 +104,19 @@ class State():
 
     def __init__(
         self,
-        pos_x = [math.sin((180/math.pi)*90)*5, math.sin((180/math.pi)*90)*5 + 7*math.sin((180/math.pi)*-90)],
-        pos_y = [-math.cos((180/math.pi)*90)*5, -math.cos((180/math.pi)*90)*5 - 7*math.cos((180/math.pi)*-90)],
-        theta = [(180/math.pi)*90, (180/math.pi)*-90],# 0 = South
-        omega = [0, 0]
+        pos_x = None,
+        pos_y = None,
+        theta = None,# 0 = South
+        omega = None,
+        mass = None,
+        length = None
     ):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.theta = theta
         self.omega = omega
+        self.mass = mass
+        self.length = length
 
     def __str__(self):
 
@@ -100,6 +128,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] + other.pos_x[i]
@@ -107,7 +137,7 @@ class State():
             t_t[i] = self.theta[i] + other.theta[i]
             t_o[i] = self.omega[i] + other.omega[i]
 
-        return State(t_x, t_y, t_t, t_o)
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
     def __mul__(self, other):
 
@@ -115,6 +145,8 @@ class State():
         t_y = [0,0]
         t_t = [0,0]
         t_o = [0,0]
+        t_m = self.mass
+        t_l = self.length
 
         for i in range(2):
             t_x[i] = self.pos_x[i] * other
@@ -122,19 +154,29 @@ class State():
             t_t[i] = self.theta[i] * other
             t_o[i] = self.omega[i] * other
 
-        return State(t_x, t_y, t_t, t_o)
-    
+        return State(t_x, t_y, t_t, t_o, t_m, t_l)
 
 
 size = 10000
 
-state = State()
+t1, t2 = 0.5*math.pi, 0.5*math.pi
+o1, o2 = 0, 0
+m1, m2 = 1, 1.5
+l1, l2 = 5, 7
+
+x1 = math.sin(t1)*l1
+y1 = -math.cos(t1)*l2
+
+pos_x = [x1, x1 + l2*math.sin(t2)]
+pos_y = [y1, y1 - l2*math.cos(t2)]
+
+state = State(pos_x,pos_y,[t1,t2],[o1,o2],[m1,m2],[l1,l2])
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-plt.xlim(-12, 12)
-plt.ylim(-12, 12)
+plt.xlim(-14, 14)
+plt.ylim(-14, 14)
 
 dot = ax.plot(0, 0, 'o', color = "#1b5e20")
 
@@ -148,15 +190,3 @@ line4, = ax.plot([0, 0], [0, 0], '-')
 ani = animation.FuncAnimation(fig, update, size, fargs=(state, dot1, dot2, line3, line4), interval = 1)
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-# goodluck future self
