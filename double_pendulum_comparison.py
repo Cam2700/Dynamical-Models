@@ -76,8 +76,8 @@ size = 1000
 skip = 100
 dimension = 1
 
-x_matrix = np.zeros(shape = (size*skip, 2, dimension))
-y_matrix = np.zeros(shape = (size*skip, 2, dimension))
+x_matrix = np.zeros(shape = (size, 2, dimension))
+y_matrix = np.zeros(shape = (size, 2, dimension))
 
 t1, t2 = 1, 1
 o1, o2 = 0.7, 0
