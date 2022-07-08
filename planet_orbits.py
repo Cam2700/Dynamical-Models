@@ -12,14 +12,44 @@ import math
 #
 # --------------------------------------------------------------------------
 #
-# Staring values for a stable orbit of a figure of eight:
+# Staring values for a stable orbit.
 # lines 83 -> 89
+#
+# Figure of eight:
+# size = 1000
+# skip = 10
 # pos_x = [0.97000436, -0.97000436, 0]
 # pos_y = [-0.24308753, 0.24308753, 0]
 # ax = [0, 0, 0]
 # ay = [0, 0, 0]
 # vx = [0.93240737/2, 0.93240737/2, -0.93240737]
 # vy = [0.86473146/2, 0.86473146/2, -0.86473146]
+# mass = [1, 1, 1]
+#
+# --------------------------------------------------------------------------
+#
+# Sheen:
+# size = 3000
+# skip = 10
+# pos_x = [0.716248295713, 0.086172594591, 0.538777980808]
+# pos_y = [0.384288553041, 1.342795868577, 0.481049882656]
+# ax = [0, 0, 0]
+# ay = [0, 0, 0]
+# vx = [1.245268230896, -0.67522432369, -0.570043907206]
+# vy = [2.444311951777, -0.96287961363, -1.481432338147]
+# mass = [1, 1, 1]
+#
+# --------------------------------------------------------------------------
+#
+# Broucke:
+# size = 3000
+# skip = 10
+# pos_x = [-0.9892620043, 2.2096177241, -1.2203557197]
+# pos_y = [0, 0, 0]
+# ax = [0, 0, 0]
+# ay = [0, 0, 0]
+# vx = [0, 0, 0]
+# vy = [1.9169244185, 0.1910268738, -2.1079512924]
 # mass = [1, 1, 1]
 
 def next_state(state, h):
@@ -59,7 +89,7 @@ def diff_value(state):
     return temp
 
 def update(num, dot1, dot2, dot3, trail4, trail5, trail6, x, y):
-    val = max(0, num - 175)
+    val = max(0, num - 3000)
     ax.set_title(num)
 
     dot1.set_data(x[num, 0], y[num, 0])
@@ -70,18 +100,18 @@ def update(num, dot1, dot2, dot3, trail4, trail5, trail6, x, y):
     trail5.set_data(x[val:num, 1], y[val:num, 1])
     trail6.set_data(x[val:num, 2], y[val:num, 2])
 
-size = 1000
+size = 3000
 skip = 10
 
 x_matrix = np.zeros(shape = (size, 3))
 y_matrix = np.zeros(shape = (size, 3))
 
-pos_x = [0.97000436, -0.97000436, 0]
-pos_y = [-0.24308753, 0.24308753, 0]
+pos_x = [-0.9892620043, 2.2096177241, -1.2203557197]
+pos_y = [0, 0, 0]
 ax = [0, 0, 0]
 ay = [0, 0, 0]
-vx = [0.93240737/2, 0.93240737/2, -0.93240737]
-vy = [0.86473146/2, 0.86473146/2, -0.86473146]
+vx = [0, 0, 0]
+vy = [1.9169244185, 0.1910268738, -2.1079512924]
 mass = [1, 1, 1]
 
 vector = np.zeros((3, 7))
@@ -107,9 +137,9 @@ dot1, = ax.plot(x[:, 0], y[:, 0], 'o', color = "#2ca02c")
 dot2, = ax.plot(x[:, 1], y[:, 1], 'o', color = "#1f77b4")
 dot3, = ax.plot(x[:, 2], y[:, 2], 'o', color = "#ff7f0e")
 
-trail4, = ax.plot(x[:, 0], y[:, 0], '-.', color = "#2ca02c")
-trail5, = ax.plot(x[:, 1], y[:, 1], '-.', color = "#1f77b4")
-trail6, = ax.plot(x[:, 2], y[:, 2], '-.', color = "#ff7f0e")
+trail4, = ax.plot(x[:, 0], y[:, 0], '-', color = "#2ca02c")
+trail5, = ax.plot(x[:, 1], y[:, 1], '-', color = "#1f77b4")
+trail6, = ax.plot(x[:, 2], y[:, 2], '-', color = "#ff7f0e")
 
 ani = animation.FuncAnimation(fig, update, size, fargs=(dot1, dot2, dot3, trail4, trail5, trail6, x, y), interval = 1)
 
