@@ -3,6 +3,25 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 import math
 
+# An animated diagram to show three planets interacting
+#
+# --------------------------------------------------------------------------
+#
+# The updating of states works the same as the pendulum examples
+# diff_state contains different equation
+#
+# --------------------------------------------------------------------------
+#
+# Staring values for a stable orbit of a figure of eight:
+# lines 83 -> 89
+# pos_x = [0.97000436, -0.97000436, 0]
+# pos_y = [-0.24308753, 0.24308753, 0]
+# ax = [0, 0, 0]
+# ay = [0, 0, 0]
+# vx = [0.93240737/2, 0.93240737/2, -0.93240737]
+# vy = [0.86473146/2, 0.86473146/2, -0.86473146]
+# mass = [1, 1, 1]
+
 def next_state(state, h):
     k1 = diff_value(state)
     k2 = diff_value(state + (k1*(h/2)))
